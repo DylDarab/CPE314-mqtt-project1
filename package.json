@@ -8,7 +8,11 @@
     "start-broker": "npx ts-node broker.ts",
     "start-client": "npx ts-node client.ts",
     "start-server": "npx ts-node server.ts",
-    "build": "npx pkg broker.ts --out-path dist --targets node14-linux-x64,node14-macos-x64,node14-win-x64"
+    "transpile": "npx tsc client --outDir dist && npx tsc server --outDir dist && npx tsc broker --outDir dist",
+    "build-client": "npx pkg ./dist/client.js --out-path ./dist/client --targets node18-linux-x64,node18-macos-x64,node18-win-x64,node18-macos-arm64",
+    "build-server": "npx pkg ./dist/server.js --out-path ./dist/server --targets node18-linux-x64,node18-macos-x64,node18-win-x64,node18-macos-arm64",
+    "build-broker": "npx pkg ./dist/broker.js --out-path ./dist/broker --targets node18-linux-x64,node18-macos-x64,node18-win-x64,node18-macos-arm64",
+    "build-all": "pnpm transpile && pnpm transpile && pnpm run build-client && pnpm run build-server && pnpm run build-broker"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +24,7 @@
     "aedes-server-factory": "^0.2.1",
     "better-sqlite3": "^8.1.0",
     "chalk": "4.1.2",
+    "dotenv": "^16.0.3",
     "fs": "0.0.1-security",
     "ipaddr.js": "^2.0.1",
     "mqtt": "^4.3.7",

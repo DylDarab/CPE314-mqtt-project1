@@ -8,6 +8,7 @@ specifiers:
   aedes-server-factory: ^0.2.1
   better-sqlite3: ^8.1.0
   chalk: 4.1.2
+  dotenv: ^16.0.3
   fs: 0.0.1-security
   ipaddr.js: ^2.0.1
   mqtt: ^4.3.7
@@ -23,6 +24,7 @@ dependencies:
   aedes-server-factory: 0.2.1
   better-sqlite3: 8.1.0
   chalk: 4.1.2
+  dotenv: 16.0.3
   fs: 0.0.1-security
   ipaddr.js: 2.0.1
   mqtt: 4.3.7
@@ -463,6 +465,11 @@ packages:
     dependencies:
       path-type: 4.0.0
     dev: true
+
+  /dotenv/16.0.3:
+    resolution: {integrity: sha512-7GO6HghkA5fYG9TYnNxi14/7K9f5occMlp3zXAuSxn7CKCxt9xbNWG7yF8hTCSUchlfWSe3uLmlPfigevRItzQ==}
+    engines: {node: '>=12'}
+    dev: false
 
   /duplexify/4.1.2:
     resolution: {integrity: sha512-fz3OjcNCHmRP12MJoZMPglx8m4rrFP8rovnk4vT8Fs+aonZoCwGg10dSsQsfP/E62eZcPTMSMP6686fu9Qlqtw==}

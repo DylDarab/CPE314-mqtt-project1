@@ -1,64 +1,108 @@
-import chalk from 'chalk'
-import mqtt from 'mqtt'
+import fs from 'fs'; // for file system access
+import readline from 'readline'; // for reading lines from a file
+import chalk from 'chalk'; // for coloring console output
+import mqtt from 'mqtt'; // for MQTT communication
 
-const client = mqtt.connect('mqtt://localhost:1883')
+// Connect to local MQTT broker
+const client = mqtt.connect('mqtt://localhost:1883');
 
-const readTemperatureSensor = (): number => {
-  return Math.random() * 100
+// Get the path to the CSV file to process from command line arguments
+const filePath = './csv/' + process.argv[2];
+
+// Define interface for sensor data object
+interface SensorData {
+  temperature: number;
+  humidity: number;
+  thermalArray: number[];
 }
 
-const readHumiditySensor = (): number => {
-  return Math.random() * 100
-}
+// Function to split a CSV line into fields
+const splitFields = (line: string): string[] => {
+  // Regular expression to match commas that are not inside double-quotes
+  const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
+  return line.split(regex).map((field) => field.trim());
+};
 
-const readThermalArray = (): number[] => {
-  return Array.from({ length: 728 }, () => Math.random() * 100)
-}
+// Function to process data from CSV file
+const processData = (): void => {
+  // Create a read interface for the CSV file
+  const readInterface = readline.createInterface({
+    input: fs.createReadStream(filePath),
+    crlfDelay: Infinity,
+  });
 
-const readSensors = () => {
-  return {
-    temperature: readTemperatureSensor(),
-    humidity: readHumiditySensor(),
-    thermalArray: readThermalArray(),
-  }
-}
+  let lineCount = 0;
 
-const sendSensorsData = (): void => {
-  let sensorsData = readSensors()
-  let payload = JSON.stringify(sensorsData)
+  // Listen for 'line' events emitted by the read interface
+  readInterface.on('line', (line: any) => {
+    const delay = lineCount * 20000; // Delay processing
+    setTimeout(() => {
+      // Process the line after the delay
+      // Split the line into fields and parse them as numbers
+      const [Temperature, Humidity, ThermalArray] = splitFields(line);
+      const temperature = parseFloat(Temperature);
+      const humidity = parseFloat(Humidity);
+      // Split the thermal array field into numbers
+      const thermalArray = ThermalArray.split(',')
+        .map(parseFloat)
+        .filter((value) => !isNaN(value));
 
+      // Create a sensor data object from the parsed fields
+      const sensorData: SensorData = { temperature, humidity, thermalArray };
+
+      // Check if the data is valid
+      if (
+        sensorData.temperature &&
+        sensorData.humidity &&
+        sensorData.thermalArray.length
+      ) {
+        // If the data is valid, send it to the MQTT broker
+        sendSensorsData(sensorData);
+      }
+    }, delay);
+    lineCount++;
+  });
+};
+
+// Function to send sensor data to the MQTT broker
+const sendSensorsData = (sensorsData: SensorData): void => {
+  let payload = JSON.stringify(sensorsData);
+
+  // Determine the maximum size of each MQTT message (default is 250 bytes)
   const chunkSize = process.env.CHUNK_SIZE
     ? parseInt(process.env.CHUNK_SIZE)
-    : 250
+    : 250;
 
-  client.publish('sensorData/start', '')
+  // Send a start message to indicate the start of a sensor data transmission
+  client.publish('sensorData/start', '');
 
+  // Send the data in chunks of up to chunkSize bytes
   for (let i = 0; i < payload.length; i += chunkSize) {
-    let chunk = payload.slice(i, i + chunkSize)
-
-    client.publish(`sensorData/${i / 250 + 1}`, chunk)
+    let chunk = payload.slice(i, i + chunkSize);
+    // Send each chunk as a separate MQTT message
+    client.publish(`sensorData/${i / 250 + 1}`, chunk);
+    // Send an end message to indicate the end of a sensor data transmission
     if (i + chunkSize >= payload.length) {
-      client.publish('sensorData/end', '')
+      client.publish('sensorData/end', '');
     }
   }
-}
+};
 
+// Wait for the MQTT client to connect to the broker
 setTimeout(() => {
+  // Check if the client is connected
   if (client.connected) {
     console.log(
       chalk.white.bgGreen('Connected to MQTT server at localhost:1883')
-    )
-
-    sendSensorsData()
-    setInterval(() => {
-      sendSensorsData()
-    }, 20000)
+    );
+    // Process the data from the CSV file
+    processData();
   } else {
     console.log(
       chalk.white.bold.bgRed('Error:'),
       'Could not connect to MQTT server',
       chalk.white.bgRed('localhost:1883')
-    )
-    client.end()
+    );
+    client.end();
   }
-}, 1000)
+}, 1000);

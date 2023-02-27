@@ -1,19 +1,19 @@
-import fs from 'fs'
-import mqtt from 'mqtt'
-import sqlite3 from 'better-sqlite3'
+const fs = require('fs');
+const mqtt = require('mqtt');
+const sqlite3 = require('better-sqlite3');
 
-let dbDir: string = ''
-let count: number = 1
+let dbDir: string = '';
+let count: number = 1;
 
 if (process.argv[2]) {
-  dbDir = process.argv[2]
+  dbDir = process.argv[2];
 } else {
-  while (fs.existsSync(`./mqtt${count}.sqlite`)) {
-    count++
+  while (fs.existsSync(`./db/mqtt${count}.sqlite`)) {
+    count++;
   }
-  dbDir = `./mqtt${count}.sqlite`
+  dbDir = `./db/mqtt${count}.sqlite`;
 }
-const db = sqlite3(dbDir)
+const db = sqlite3(dbDir);
 
 db.prepare(
   `
@@ -27,17 +27,17 @@ db.prepare(
     thermalArray STRING
   );  
 `
-).run()
+).run();
 
-const client = mqtt.connect('mqtt://localhost:1883')
+const client = mqtt.connect('mqtt://localhost:1883');
 
 client.on('connect', () => {
-  console.log('Connected to MQTT server at localhost:1883 writing at ', dbDir)
+  console.log('Connected to MQTT server at localhost:1883 writing at ', dbDir);
 
-  client.subscribe('sensorData/final')
+  client.subscribe('sensorData/final');
 
   client.on('message', (topic, message) => {
-    const data = JSON.parse(message.toString())
+    const data = JSON.parse(message.toString());
     db.prepare(
       `
         INSERT INTO sensorData (timestamp, clientID, ipAddr, humidity, temperature, thermalArray
@@ -51,8 +51,8 @@ client.on('connect', () => {
       data.humidity,
       data.temperature,
       JSON.stringify(data.thermalArray)
-    )
+    );
 
-    console.log('Received sensor data from', data.clientID)
-  })
-})
+    console.log('Received sensor data from', data.clientID);
+  });
+});

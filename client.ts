@@ -1,13 +1,17 @@
-import fs from 'fs'; // for file system access
-import readline from 'readline'; // for reading lines from a file
-import chalk from 'chalk'; // for coloring console output
-import mqtt from 'mqtt'; // for MQTT communication
+const fs = require('fs');
+const readline = require('readline');
+const mqtt = require('mqtt');
+const chalk = require('chalk');
+const dotenv = require('dotenv');
+
+// Load environment variables from .env file
+dotenv.config();
 
 // Connect to local MQTT broker
 const client = mqtt.connect('mqtt://localhost:1883');
 
 // Get the path to the CSV file to process from command line arguments
-const filePath = './csv/' + process.argv[2];
+const filePath = './csv/' + process.argv[2] && 'csv file path on your computer';
 
 // Define interface for sensor data object
 interface SensorData {

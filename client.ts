@@ -30,12 +30,16 @@ const processData = (): void => {
     input: fs.createReadStream(filePath),
     crlfDelay: Infinity,
   });
-
   let lineCount = 0;
-
+  let sendingCount = 0;
   // Listen for 'line' events emitted by the read interface
   readInterface.on('line', (line: any) => {
-    const delay = lineCount * 20000; // Delay processing
+    let delay = sendingCount * 20000;
+
+    if (lineCount === 0) {
+      delay = 0;
+    }
+
     setTimeout(() => {
       // Process the line after the delay
       // Split the line into fields and parse them as numbers
@@ -60,6 +64,11 @@ const processData = (): void => {
         sendSensorsData(sensorData);
       }
     }, delay);
+
+    if (lineCount !== 0) {
+      lineCount++;
+      sendingCount++;
+    }
     lineCount++;
   });
 };

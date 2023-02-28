@@ -1,13 +1,17 @@
-import fs from 'fs'; // for file system access
-import readline from 'readline'; // for reading lines from a file
-import chalk from 'chalk'; // for coloring console output
-import mqtt from 'mqtt'; // for MQTT communication
+const fs = require('fs');
+const readline = require('readline');
+const mqtt = require('mqtt');
+const chalk = require('chalk');
+const dotenv = require('dotenv');
+
+// Load environment variables from .env file
+dotenv.config();
 
 // Connect to local MQTT broker
 const client = mqtt.connect('mqtt://localhost:1883');
 
 // Get the path to the CSV file to process from command line arguments
-const filePath = './csv/' + process.argv[2];
+const filePath = './csv/' + process.argv[2] || 'path/to/csv/file';
 
 // Define interface for sensor data object
 interface SensorData {
@@ -23,18 +27,24 @@ const splitFields = (line: string): string[] => {
   return line.split(regex).map((field) => field.trim());
 };
 
+let sendingCount = 0;
+let finishSendingCount = 0;
+
 // Function to process data from CSV file
 const processData = (): void => {
+  let lineCount = 0;
+
   // Create a read interface for the CSV file
   const readInterface = readline.createInterface({
     input: fs.createReadStream(filePath),
     crlfDelay: Infinity,
   });
-  let lineCount = 0;
-  let sendingCount = 0;
   // Listen for 'line' events emitted by the read interface
+
+  console.log(chalk.white.bgGreen('Start getting data...'));
+
   readInterface.on('line', (line: any) => {
-    let delay = sendingCount * 20000;
+    let delay = sendingCount * 100;
 
     if (lineCount === 0) {
       delay = 0;
@@ -62,6 +72,12 @@ const processData = (): void => {
       ) {
         // If the data is valid, send it to the MQTT broker
         sendSensorsData(sensorData);
+      }
+    }, delay);
+
+    setTimeout(() => {
+      if (sendingCount === finishSendingCount) {
+        console.log(chalk.white.bgGreen('Done getting data...'));
       }
     }, delay);
 
@@ -93,6 +109,7 @@ const sendSensorsData = (sensorsData: SensorData): void => {
     // Send an end message to indicate the end of a sensor data transmission
     if (i + chunkSize >= payload.length) {
       client.publish('sensorData/end', '');
+      finishSendingCount++;
     }
   }
 };
@@ -105,6 +122,7 @@ setTimeout(() => {
       chalk.white.bgGreen('Connected to MQTT server at localhost:1883')
     );
     // Process the data from the CSV file
+
     processData();
   } else {
     console.log(

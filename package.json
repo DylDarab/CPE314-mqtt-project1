@@ -20,6 +20,7 @@
     "aedes-server-factory": "^0.2.1",
     "better-sqlite3": "^8.1.0",
     "chalk": "4.1.2",
+    "dotenv": "^16.0.3",
     "fs": "0.0.1-security",
     "ipaddr.js": "^2.0.1",
     "mqtt": "^4.3.7",

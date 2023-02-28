@@ -11,7 +11,10 @@ dotenv.config();
 const client = mqtt.connect('mqtt://localhost:1883');
 
 // Get the path to the CSV file to process from command line arguments
-const filePath = './csv/' + process.argv[2] && 'csv file path on your computer';
+const filePath =
+  './csv/' + process.argv[2] ||
+  '/Users/grapesc/Desktop/playground/college/cpe314/CPE-314-mqtt-project1-v2/csv/MQTT_MockNoi.csv';
+console.log('filePath: ', filePath);
 
 // Define interface for sensor data object
 interface SensorData {

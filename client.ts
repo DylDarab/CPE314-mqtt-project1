@@ -1,8 +1,8 @@
-const fs = require('fs');
-const readline = require('readline');
-const mqtt = require('mqtt');
-const chalk = require('chalk');
-const dotenv = require('dotenv');
+import fs from 'fs';
+import readline from 'readline';
+import mqtt from 'mqtt';
+import chalk from 'chalk';
+import dotenv from 'dotenv';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -44,7 +44,7 @@ const processData = (): void => {
   console.log(chalk.white.bgGreen('Start getting data...'));
 
   readInterface.on('line', (line: any) => {
-    let delay = sendingCount * 100;
+    let delay = sendingCount * 20000;
 
     if (lineCount === 0) {
       delay = 0;

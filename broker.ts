@@ -1,8 +1,8 @@
-const aedes = require('aedes');
-const { createServer } = require('aedes-server-factory');
-const chalk = require('chalk');
-const ipaddr = require('ipaddr.js');
-const dotenv = require('dotenv');
+import aedes from 'aedes';
+import { createServer } from 'aedes-server-factory';
+import chalk from 'chalk';
+import ipaddr from 'ipaddr.js';
+import dotenv from 'dotenv';
 
 // Load environment variables from .env file
 dotenv.config();

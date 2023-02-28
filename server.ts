@@ -1,6 +1,6 @@
-const fs = require('fs');
-const mqtt = require('mqtt');
-const sqlite3 = require('better-sqlite3');
+import fs from 'fs';
+import mqtt from 'mqtt';
+import sqlite3 from 'better-sqlite3';
 
 let dbDir: string = '';
 let count: number = 1;

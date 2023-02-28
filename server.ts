@@ -54,8 +54,8 @@ client.on('connect', () => {
         ) VALUES (?, ?, ?, ?, ?, ?)
       `
     ).run(
-      Date.now(),
       //@ts-ignore
+      data.timestamp,
       data.clientID,
       data.ipAddr,
       data.humidity,

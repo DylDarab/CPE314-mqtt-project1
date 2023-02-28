@@ -71,7 +71,6 @@ server.listen(PORT, () => {
             clientID: client?.id,
             // @ts-ignore
             ipAddr: client?.conn._sockname.address,
-            timestamp: Date.now(),
           }),
           qos: 0,
           retain: false,

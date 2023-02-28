@@ -18,6 +18,7 @@ interface SensorData {
   temperature: number;
   humidity: number;
   thermalArray: number[];
+  timestamp: number;
 }
 
 // Function to split a CSV line into fields
@@ -63,7 +64,12 @@ const processData = (): void => {
         .filter((value) => !isNaN(value));
 
       // Create a sensor data object from the parsed fields
-      const sensorData: SensorData = { humidity, temperature, thermalArray };
+      const sensorData: SensorData = {
+        humidity,
+        temperature,
+        thermalArray,
+        timestamp: Date.now(),
+      };
 
       // Check if the data is valid
       if (
@@ -95,6 +101,8 @@ const processData = (): void => {
 // Function to send sensor data to the MQTT broker
 const sendSensorsData = (sensorsData: SensorData): void => {
   let payload = JSON.stringify(sensorsData);
+
+  console.log('Payload: ', payload);
 
   // Determine the maximum size of each MQTT message (default is 250 bytes)
   const chunkSize = process.env.CHUNK_SIZE

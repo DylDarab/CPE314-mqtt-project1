@@ -39,10 +39,10 @@ const processData = (): void => {
     input: fs.createReadStream(filePath),
     crlfDelay: Infinity,
   });
-  // Listen for 'line' events emitted by the read interface
 
   console.log(chalk.white.bgGreen('Start getting data...'));
 
+  // Listen for 'line' events emitted by the read interface
   readInterface.on('line', (line: any) => {
     let delay = sendingCount * 20000;
 
@@ -53,16 +53,17 @@ const processData = (): void => {
     setTimeout(() => {
       // Process the line after the delay
       // Split the line into fields and parse them as numbers
-      const [Temperature, Humidity, ThermalArray] = splitFields(line);
+      const [Humidity, Temperature, ThermalArray] = splitFields(line);
       const temperature = parseFloat(Temperature);
       const humidity = parseFloat(Humidity);
+
       // Split the thermal array field into numbers
       const thermalArray = ThermalArray.split(',')
         .map(parseFloat)
         .filter((value) => !isNaN(value));
 
       // Create a sensor data object from the parsed fields
-      const sensorData: SensorData = { temperature, humidity, thermalArray };
+      const sensorData: SensorData = { humidity, temperature, thermalArray };
 
       // Check if the data is valid
       if (
@@ -75,17 +76,19 @@ const processData = (): void => {
       }
     }, delay);
 
-    setTimeout(() => {
-      if (sendingCount === finishSendingCount) {
-        console.log(chalk.white.bgGreen('Done getting data...'));
-      }
-    }, delay);
-
+    // Increment the line count
     if (lineCount !== 0) {
       lineCount++;
       sendingCount++;
     }
     lineCount++;
+
+    // Check if all data has been sent
+    setTimeout(() => {
+      if (sendingCount === finishSendingCount) {
+        console.log(chalk.white.bgGreen('Done getting data...'));
+      }
+    }, delay);
   });
 };
 

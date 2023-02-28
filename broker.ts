@@ -69,7 +69,6 @@ server.listen(PORT, () => {
           payload: JSON.stringify({
             ...JSON.parse(allData),
             clientID: client?.id,
-            // @ts-ignore
             ipAddr: client?.conn._sockname.address,
           }),
           qos: 0,

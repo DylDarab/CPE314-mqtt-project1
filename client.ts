@@ -102,8 +102,6 @@ const processData = (): void => {
 const sendSensorsData = (sensorsData: SensorData): void => {
   let payload = JSON.stringify(sensorsData);
 
-  console.log('Payload: ', payload);
-
   // Determine the maximum size of each MQTT message (default is 250 bytes)
   const chunkSize = process.env.CHUNK_SIZE
     ? parseInt(process.env.CHUNK_SIZE)
@@ -133,7 +131,6 @@ setTimeout(() => {
       chalk.white.bgGreen('Connected to MQTT server at localhost:1883')
     );
     // Process the data from the CSV file
-
     processData();
   } else {
     console.log(

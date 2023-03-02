@@ -40,8 +40,9 @@ const processData = (): void => {
     input: fs.createReadStream(filePath),
     crlfDelay: Infinity,
   });
-
-  console.log(chalk.white.bgGreen('Start getting data...'));
+  console.log(chalk.magenta('\n---------------------------------\n'));
+  console.log(chalk.magenta.bold('Start getting data...'));
+  console.log(chalk.magenta('\n---------------------------------\n'));
 
   // Listen for 'line' events emitted by the read interface
   readInterface.on('line', (line: any) => {
@@ -92,7 +93,9 @@ const processData = (): void => {
     // Check if all data has been sent
     setTimeout(() => {
       if (sendingCount === finishSendingCount) {
-        console.log(chalk.white.bgGreen('Done getting data...'));
+        console.log(chalk.cyan('\n---------------------------------\n'));
+        console.log(chalk.cyan.bold('Done getting data...'));
+        console.log(chalk.cyan('\n---------------------------------\n'));
       }
     }, delay);
   });
@@ -128,15 +131,22 @@ setTimeout(() => {
   // Check if the client is connected
   if (client.connected) {
     console.log(
-      chalk.white.bgGreen('Connected to MQTT server at localhost:1883')
+      chalk.green('Connected to MQTT server at localhost:1883')
     );
+    console.log(
+      chalk(
+        "\nPlease start the server with the command: " +
+          chalk.dim("pnpm start-servar\n")
+      )
+    );
+    console.log(chalk.yellow('Data getting every 3 minutes after start server...'));
     // Process the data from the CSV file
     processData();
   } else {
     console.log(
-      chalk.white.bold.bgRed('Error:'),
-      'Could not connect to MQTT server',
-      chalk.white.bgRed('localhost:1883')
+      chalk.red('Error:'),
+      chalk.red('Could not connect to MQTT server'),
+      chalk.red('localhost:1883')
     );
     client.end();
   }

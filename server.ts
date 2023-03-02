@@ -1,8 +1,9 @@
-import fs from 'fs';
-import mqtt from 'mqtt';
-import sqlite3 from 'better-sqlite3';
+import fs from "fs";
+import mqtt from "mqtt";
+import sqlite3 from "better-sqlite3";
+import chalk from "chalk";
 
-let dbDir: string = '';
+let dbDir: string = "";
 let count: number = 1;
 
 // Check if the user has specified a database file
@@ -34,17 +35,20 @@ db.prepare(
 ).run();
 
 // Connect to the MQTT broker
-const client = mqtt.connect('mqtt://localhost:1883');
+const client = mqtt.connect("mqtt://localhost:1883");
 
 // Listen for 'connect' events emitted by the client
-client.on('connect', () => {
-  console.log('Connected to MQTT server at localhost:1883 writing at ', dbDir);
+client.on("connect", () => {
+  console.log(
+    chalk.cyan("*** Connected to MQTT server at localhost:1883 writing at "),
+    chalk.yellowBright(dbDir) + chalk.cyan(" ***\n")
+  );
 
   // Subscribe to the 'sensorData/final' topic
-  client.subscribe('sensorData/final');
+  client.subscribe("sensorData/final");
 
   // Listen for 'message' events emitted by the client
-  client.on('message', (topic: string, message: Buffer) => {
+  client.on("message", (topic: string, message: Buffer) => {
     const data = JSON.parse(message.toString());
 
     // Insert the sensor data into the database
@@ -63,6 +67,6 @@ client.on('connect', () => {
       JSON.stringify(data.thermalArray)
     );
     // Log the client ID of the sensor that sent the data
-    console.log('Received sensor data from', data.clientID);
+    console.log(chalk.yellow("Received sensor data from", data.clientID));
   });
 });

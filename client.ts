@@ -136,7 +136,7 @@ setTimeout(() => {
     console.log(
       chalk(
         "\nPlease start the server with the command: " +
-          chalk.dim("pnpm start-servar\n")
+          chalk.dim("pnpm start-server\n")
       )
     );
     console.log(chalk.yellow('Data getting every 3 minutes after start server...'));

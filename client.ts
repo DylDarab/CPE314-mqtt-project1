@@ -23,7 +23,6 @@ interface SensorData {
 
 // Function to split a CSV line into fields
 const splitFields = (line: string): string[] => {
-  // Regular expression to match commas that are not inside double-quotes
   const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
   return line.split(regex).map((field) => field.trim());
 };
@@ -44,27 +43,24 @@ const processData = (): void => {
   console.log(chalk.magenta.bold('Start getting data...'));
   console.log(chalk.magenta('\n---------------------------------\n'));
 
-  // Listen for 'line' events emitted by the read interface
-  readInterface.on('line', (line: any) => {
-    let delay = sendingCount * 20000;
+  // Read each line from the CSV file
+  readInterface.on('line', (line: string) => {
+    let delay = sendingCount * 180000;
 
     if (lineCount === 0) {
       delay = 0;
     }
 
+    // send sensor data
     setTimeout(() => {
-      // Process the line after the delay
-      // Split the line into fields and parse them as numbers
       const [Humidity, Temperature, ThermalArray] = splitFields(line);
       const temperature = parseFloat(Temperature);
       const humidity = parseFloat(Humidity);
 
-      // Split the thermal array field into numbers
       const thermalArray = ThermalArray.split(',')
         .map(parseFloat)
         .filter((value) => !isNaN(value));
 
-      // Create a sensor data object from the parsed fields
       const sensorData: SensorData = {
         humidity,
         temperature,
@@ -78,19 +74,17 @@ const processData = (): void => {
         sensorData.humidity &&
         sensorData.thermalArray.length
       ) {
-        // If the data is valid, send it to the MQTT broker
         sendSensorsData(sensorData);
       }
     }, delay);
 
-    // Increment the line count
     if (lineCount !== 0) {
       lineCount++;
       sendingCount++;
     }
     lineCount++;
 
-    // Check if all data has been sent
+    // Log when all data has been sent
     setTimeout(() => {
       if (sendingCount === finishSendingCount) {
         console.log(chalk.cyan('\n---------------------------------\n'));
@@ -105,19 +99,21 @@ const processData = (): void => {
 const sendSensorsData = (sensorsData: SensorData): void => {
   let payload = JSON.stringify(sensorsData);
 
-  // Determine the maximum size of each MQTT message (default is 250 bytes)
+  // Determine the maximum size of each MQTT message
   const chunkSize = process.env.CHUNK_SIZE
     ? parseInt(process.env.CHUNK_SIZE)
     : 250;
 
-  // Send a start message to indicate the start of a sensor data transmission
+  // Start a new sensor data transmission
   client.publish('sensorData/start', '');
 
   // Send the data in chunks of up to chunkSize bytes
   for (let i = 0; i < payload.length; i += chunkSize) {
     let chunk = payload.slice(i, i + chunkSize);
-    // Send each chunk as a separate MQTT message
+
+    // Send the chunk of data
     client.publish(`sensorData/${i / 250 + 1}`, chunk);
+
     // Send an end message to indicate the end of a sensor data transmission
     if (i + chunkSize >= payload.length) {
       client.publish('sensorData/end', '');
@@ -126,21 +122,19 @@ const sendSensorsData = (sensorsData: SensorData): void => {
   }
 };
 
-// Wait for the MQTT client to connect to the broker
+// Log when the client connects to the MQTT broker
 setTimeout(() => {
-  // Check if the client is connected
   if (client.connected) {
-    console.log(
-      chalk.green('Connected to MQTT server at localhost:1883')
-    );
+    console.log(chalk.green('Connected to MQTT server at localhost:1883'));
     console.log(
       chalk(
-        "\nPlease start the server with the command: " +
-          chalk.dim("pnpm start-server\n")
+        '\nPlease start the server with the command: ' +
+          chalk.dim('pnpm start-server\n')
       )
     );
-    console.log(chalk.yellow('Data getting every 3 minutes after start server...'));
-    // Process the data from the CSV file
+    console.log(
+      chalk.yellow('Data getting every 3 minutes after start server...')
+    );
     processData();
   } else {
     console.log(

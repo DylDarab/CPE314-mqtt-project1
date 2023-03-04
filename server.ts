@@ -67,6 +67,7 @@ client.on("connect", () => {
       JSON.stringify(data.thermalArray)
     );
     // Log the client ID of the sensor that sent the data
+
     console.log(chalk.yellow("Received sensor data from", data.clientID));
   });
 });

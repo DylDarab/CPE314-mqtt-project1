@@ -1,17 +1,17 @@
-import fs from 'fs';
-import readline from 'readline';
-import mqtt from 'mqtt';
-import chalk from 'chalk';
-import dotenv from 'dotenv';
+import fs from "fs";
+import readline from "readline";
+import mqtt from "mqtt";
+import chalk from "chalk";
+import dotenv from "dotenv";
 
 // Load environment variables from .env file
 dotenv.config();
 
 // Connect to local MQTT broker
-const client = mqtt.connect('mqtt://localhost:1883');
+const client = mqtt.connect("mqtt://localhost:1883");
 
 // Get the path to the CSV file to process from command line arguments
-const filePath = process.argv[2] || 'path/to/csv/file';
+const filePath = process.argv[2] || "path/to/csv/file";
 
 // Define interface for sensor data object
 interface SensorData {
@@ -38,16 +38,21 @@ const processData = (): void => {
     input: fs.createReadStream(filePath),
     crlfDelay: Infinity,
   });
-  console.log(chalk.magenta('\n---------------------------------\n'));
-  console.log(chalk.magenta.bold('Start getting data...'));
-  console.log(chalk.magenta('\n---------------------------------\n'));
+  const now = new Date();
+  const startSendTime = now.toLocaleTimeString();
+  console.log(chalk.magenta("\n---------------------------------\n"));
+  console.log(
+    chalk.white.bgBlack.bold("[" + startSendTime + "] ") +
+      chalk.magenta.bold("Start sending data...")
+  );
+  console.log(chalk.magenta("\n---------------------------------\n"));
 
   // Read each line from the CSV file
-  readInterface.on('line', (line: string) => {
+  readInterface.on("line", (line: string) => {
     let delay = 0;
 
-    if(lineCount > 1) {
-      delay = (lineCount - 1) * 10000;
+    if (lineCount > 1) {
+      delay = (lineCount - 1) * 1000;
     }
 
     // send sensor data
@@ -56,7 +61,7 @@ const processData = (): void => {
       const temperature = parseFloat(Temperature);
       const humidity = parseFloat(Humidity);
 
-      const thermalArray = ThermalArray.split(',')
+      const thermalArray = ThermalArray.split(",")
         .map(parseFloat)
         .filter((value) => !isNaN(value));
 
@@ -81,10 +86,15 @@ const processData = (): void => {
 
     // Log when all data has been sent
     setTimeout(() => {
-      if (lineCount-1 === sentCount) {
-        console.log(chalk.cyan('\n---------------------------------\n'));
-        console.log(chalk.cyan.bold('Done getting data...'));
-        console.log(chalk.cyan('\n---------------------------------\n'));
+      if (lineCount - 1 === sentCount) {
+        const now = new Date();
+        const doneSendTime = now.toLocaleTimeString();
+        console.log(chalk.cyan("\n---------------------------------\n"));
+        console.log(
+          chalk.white.bgBlack.bold("[" + doneSendTime + "] ") +
+            chalk.cyan.bold("Done sending data...")
+        );
+        console.log(chalk.cyan("\n---------------------------------\n"));
       }
     }, delay);
   });
@@ -100,7 +110,7 @@ const sendSensorsData = (sensorsData: SensorData): void => {
     : 250;
 
   // Start a new sensor data transmission
-  client.publish('sensorData/start', '');
+  client.publish("sensorData/start", "");
 
   // Send the data in chunks of up to chunkSize bytes
   for (let i = 0; i < payload.length; i += chunkSize) {
@@ -111,7 +121,7 @@ const sendSensorsData = (sensorsData: SensorData): void => {
 
     // Send an end message to indicate the end of a sensor data transmission
     if (i + chunkSize >= payload.length) {
-      client.publish('sensorData/end', '');
+      client.publish("sensorData/end", "");
       sentCount++;
     }
   }
@@ -120,22 +130,22 @@ const sendSensorsData = (sensorsData: SensorData): void => {
 // Log when the client connects to the MQTT broker
 setTimeout(() => {
   if (client.connected) {
-    console.log(chalk.green('Connected to MQTT server at localhost:1883'));
+    console.log(chalk.green("Connected to MQTT server at localhost:1883"));
     console.log(
       chalk(
-        '\nPlease start the server with the command: ' +
-          chalk.dim('pnpm start-server\n')
+        "\nPlease start the server with the command: " +
+          chalk.dim("pnpm start-server\n")
       )
     );
     console.log(
-      chalk.yellow('Data getting every 3 minutes after start server...')
+      chalk.yellow("Data sending every 3 minutes after start server...")
     );
     processData();
   } else {
     console.log(
-      chalk.red('Error:'),
-      chalk.red('Could not connect to MQTT server'),
-      chalk.red('localhost:1883')
+      chalk.red("Error:"),
+      chalk.red("Could not connect to MQTT server"),
+      chalk.red("localhost:1883")
     );
     client.end();
   }

@@ -6,7 +6,11 @@ This is an MQTT-based IoT application that sends sensor readings from an IoT nod
 
 ![mqtt-architect](https://user-images.githubusercontent.com/76202663/222755386-26d01b3f-07cc-43c7-b6ec-656115301b93.png)
 
-The Client has three types of sensors - Relative humidity, temperature, and thermal array. The Broker forwards any data it receives to its subscribers. The Server subscribes for data from Client, assembles the data as necessary, and writes it in a local database for later query or visualization.
+- Client: The client reads sensor data from three sensors - Relative humidity, temperature, and thermal array. It sends the sensor data to the broker along with its node ID and the current time. The client can read sensor data stored in an Excel file and send it to the broker for every 3 minutes.
+
+- Broker: The broker receives data from the client and forwards it to its subscribers. It prints out an IP address on the screen when a new subscriber or publisher connects or disconnects, and it prints out published messages on the screen.
+
+- Server: The server subscribes to data from the client through the broker. It receives data from the client and writes it in a local database (SQLite) for later query or visualization. The server prints out received messages from the broker on the screen.
 
 ## Getting Started
 
@@ -14,7 +18,7 @@ The Client has three types of sensors - Relative humidity, temperature, and ther
 
 To run the project, you will need the following:
 
-- Node.js
+- Node.js version 18.0.0 or higher
 - PNPM (Node.js package manager)
 
 ### Installation
@@ -47,13 +51,19 @@ pnpm start-client <csv_file_path>
 
 where `<csv_file_path>` is the path to the CSV file containing the sensor data. For example, `pnpm start-client data.csv`.
 
-3. Start the server by running the following command in the server directory:
+3. Start the server by running the following command:
 
 ```sh
 pnpm start-server <db_file_path>
 ```
 
-where `<db_file_path>` is the path to the SQLite database file. For example, `pnpm start-server db.sqlite`. And if the database file does not exist, it will be created new automatically in db directory.
+where <db_file_path> is the path to the SQLite database file. If you want to start the server without specifying a database file, you can run:
+
+```sh
+pnpm start-server
+```
+
+this will create a new SQLite database file automatically in the db directory.
 
 ## Running multiple clients and servers
 

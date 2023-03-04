@@ -52,7 +52,7 @@ const processData = (): void => {
     let delay = 0;
 
     if (lineCount > 1) {
-      delay = (lineCount - 1) * 1000;
+      delay = (lineCount - 1) * 180000;
     }
 
     // send sensor data

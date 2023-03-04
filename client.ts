@@ -27,8 +27,7 @@ const splitFields = (line: string): string[] => {
   return line.split(regex).map((field) => field.trim());
 };
 
-let sendingCount = 0;
-let finishSendingCount = 0;
+let sentCount = 0;
 
 // Function to process data from CSV file
 const processData = (): void => {
@@ -45,10 +44,10 @@ const processData = (): void => {
 
   // Read each line from the CSV file
   readInterface.on('line', (line: string) => {
-    let delay = sendingCount * 180000;
+    let delay = 0;
 
-    if (lineCount === 0) {
-      delay = 0;
+    if(lineCount > 1) {
+      delay = (lineCount - 1) * 10000;
     }
 
     // send sensor data
@@ -78,15 +77,11 @@ const processData = (): void => {
       }
     }, delay);
 
-    if (lineCount !== 0) {
-      lineCount++;
-      sendingCount++;
-    }
     lineCount++;
 
     // Log when all data has been sent
     setTimeout(() => {
-      if (sendingCount === finishSendingCount) {
+      if (lineCount-1 === sentCount) {
         console.log(chalk.cyan('\n---------------------------------\n'));
         console.log(chalk.cyan.bold('Done getting data...'));
         console.log(chalk.cyan('\n---------------------------------\n'));
@@ -117,7 +112,7 @@ const sendSensorsData = (sensorsData: SensorData): void => {
     // Send an end message to indicate the end of a sensor data transmission
     if (i + chunkSize >= payload.length) {
       client.publish('sensorData/end', '');
-      finishSendingCount++;
+      sentCount++;
     }
   }
 };

@@ -1,8 +1,9 @@
 {
   "name": "bro",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.ts",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start-broker": "npx ts-node broker.ts",

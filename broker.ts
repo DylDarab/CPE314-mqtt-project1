@@ -104,7 +104,7 @@ server.listen(PORT, () => {
       // If the packet topic starts with 'sensorData', add the payload to the chunk
     } else if (packet.topic.startsWith('sensorData')) {
       const part = packet.topic.split('/')[1];
-      chunk[client.id][part] = packet.payload;
+      chunk[client.id][part-1] = packet.payload;
     }
   });
 });
